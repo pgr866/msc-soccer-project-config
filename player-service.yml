@@ -1,0 +1,63 @@
+server:
+  port: 8081
+
+management:
+  info:
+    env:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,metrics"
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  application:
+    name: ${spring.application.name}
+    description: ${spring.application.description}
+    version: ${spring.application.version}
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:soccer_db}
+    username: ${DB_USER:soccer_user}
+    password: ${DB_PASSWORD:soccer_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+openapi:
+  title: Player Management API
+  description: API for managing players.
+  version: 1.0.0
+  contact:
+    name: Pablo Gomez
+    email: pgr866@inlumine.ual.es
+    url: https://github.com/pgr866
+
+eureka:
+  instance:
+    hostname: player-service
+    instanceId: ${eureka.instance.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+eureka:
+  instance:
+    hostname: player-service-${GCP_PROJECT_NUMBER}.${REGION}.run.app
+    statusPageUrl: "https://player-service-${GCP_PROJECT_NUMBER}.${REGION}.run.app/actuator/info"
+    healthCheckUrl: "https://player-service-${GCP_PROJECT_NUMBER}.${REGION}.run.app/actuator/health"
+    homePageUrl: "https://player-service-${GCP_PROJECT_NUMBER}.${REGION}.run.app/"
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_SERVER_URL}
